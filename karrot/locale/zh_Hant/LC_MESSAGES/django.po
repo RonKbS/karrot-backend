@@ -26,10 +26,10 @@ msgstr ""
 msgid "You need to have a verified email address"
 msgstr "你需要一個經過驗證的電郵地址"
 
-#: karrot/applications/api.py:36 karrot/groups/api.py:49
+#: karrot/applications/api.py:36 karrot/groups/api.py:50
 #: karrot/invitations/serializers.py:28 karrot/issues/serializers.py:124
-#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:111
-#: karrot/pickups/serializers.py:296 karrot/places/api.py:19
+#: karrot/pickups/permissions.py:67 karrot/pickups/serializers.py:112
+#: karrot/pickups/serializers.py:297 karrot/places/api.py:19
 #: karrot/places/serializers.py:80
 msgid "You need to be a group editor"
 msgstr "你必須擁有社團編輯權"
@@ -109,6 +109,7 @@ msgstr "你會收到這個是因為你訂閱了這個社團的<strong>使用者�
 #: karrot/groups/templates/group_summary.html.jinja2:310
 #: karrot/issues/templates/conflict_resolution_continued.html.jinja2:255
 #: karrot/issues/templates/new_conflict_resolution.html.jinja2:262
+#: karrot/offers/templates/new_offer.html.jinja2:275
 #: karrot/pickups/templates/pickup_notification.html.jinja2:313
 msgid "Click here to unsubscribe"
 msgstr "點擊以取消訂閱"
@@ -125,51 +126,56 @@ msgstr ""
 "直接回覆這封郵件，<a href=\"%(conversation_url)s\">在%(site_name)s上檢視</a>, 或是<a "
 "href=\"%(mute_url)s\">將對話靜音</a>"
 
-#: karrot/conversations/api.py:61 karrot/conversations/api.py:232
-#: karrot/conversations/api.py:403 karrot/conversations/serializers.py:147
+#: karrot/conversations/api.py:63 karrot/conversations/api.py:245
+#: karrot/conversations/api.py:415 karrot/conversations/serializers.py:146
 msgid "You are not in this conversation"
 msgstr "你並未加入對話"
 
-#: karrot/conversations/api.py:70
+#: karrot/conversations/api.py:72
 msgid "You are not the author of this message"
 msgstr "這則訊息不是你寫的"
 
-#: karrot/conversations/api.py:79
+#: karrot/conversations/api.py:81
 #, python-format
 msgid ""
 "You can't edit a message more than %(days_number)s days after its creation."
 msgstr "在發出訊息%(days_number)s天後你就不能編輯了"
 
-#: karrot/conversations/api.py:331
+#: karrot/conversations/api.py:344
 msgid "Must be first in thread"
 msgstr "必須是討論串中的第一個"
 
-#: karrot/conversations/api.py:334
+#: karrot/conversations/api.py:347
 msgid "You are not a participant in this thread"
 msgstr "你並未加入此討論串"
 
-#: karrot/conversations/emails.py:168 karrot/conversations/emails.py:171
-#: karrot/subscriptions/tasks.py:70
+#: karrot/conversations/emails.py:204 karrot/conversations/emails.py:207
+#: karrot/subscriptions/tasks.py:71
 #, python-format
 msgid "Pickup %(date)s"
 msgstr "領取%(date)s"
 
-#: karrot/conversations/emails.py:241
-#, python-format
-msgid "New message in application of %(user_name)s to %(group_name)s"
-msgstr "%(user_name)s申請%(group_name)s的新訊息"
-
-#: karrot/conversations/emails.py:246
+#: karrot/conversations/emails.py:240
 #, python-format
 msgid "New message in your application to %(group_name)s"
 msgstr "你的%(group_name)s申請的新訊息"
 
-#: karrot/conversations/emails.py:288
+#: karrot/conversations/emails.py:244
+#, python-format
+msgid "New message in application of %(user_name)s to %(group_name)s"
+msgstr "%(user_name)s申請%(group_name)s的新訊息"
+
+#: karrot/conversations/emails.py:266
 #, python-format
 msgid "New message in conflict resolution in %(group_name)s"
 msgstr ""
 
-#: karrot/conversations/serializers.py:149
+#: karrot/conversations/emails.py:281
+#, python-format
+msgid "New message for offer %(offer_name)s in %(group_name)s"
+msgstr ""
+
+#: karrot/conversations/serializers.py:148
 msgid "This conversation has been closed"
 msgstr ""
 
@@ -197,19 +203,19 @@ msgstr ""
 "直接回覆此信件，<a href=\"%(thread_url)s\">查看%(site_name)s上的回覆</a>，或<a "
 "href=\"%(mute_url)s\">停止新留言通知</a>"
 
-#: karrot/groups/api.py:28
+#: karrot/groups/api.py:29
 msgid "You are already a member."
 msgstr "你已經是成員了。"
 
-#: karrot/groups/api.py:35
+#: karrot/groups/api.py:36
 msgid "You can only join open groups."
 msgstr "你只能加入公開社團"
 
-#: karrot/groups/api.py:42
+#: karrot/groups/api.py:43
 msgid "You cannot give trust to yourself"
 msgstr "你不能「信任」你自己"
 
-#: karrot/groups/api.py:189
+#: karrot/groups/api.py:200
 msgid "You already gave trust to this user"
 msgstr "你已經給予此名使用者「信任」"
 
@@ -221,15 +227,15 @@ msgstr "未知的時區"
 msgid "Playground"
 msgstr "遊樂區"
 
-#: karrot/groups/serializers.py:136 karrot/groups/serializers.py:231
+#: karrot/groups/serializers.py:138 karrot/groups/serializers.py:233
 msgid "You cannot manage agreements"
 msgstr "你無法管理合約"
 
-#: karrot/groups/serializers.py:138
+#: karrot/groups/serializers.py:140
 msgid "Agreement is not for this group"
 msgstr "不是這個社團的合約"
 
-#: karrot/groups/serializers.py:229
+#: karrot/groups/serializers.py:231
 msgid "You are not in this group"
 msgstr "你並未在社團裡"
 
@@ -437,7 +443,7 @@ msgid "An invitation has already been sent to this e-mail address"
 msgstr "邀請信已寄送至下列電子郵件信箱："
 
 #: karrot/invitations/serializers.py:26 karrot/issues/serializers.py:122
-#: karrot/places/serializers.py:78
+#: karrot/offers/serializers.py:105 karrot/places/serializers.py:78
 msgid "You are not a member of this group."
 msgstr "你並不是此社團的成員。"
 
@@ -574,6 +580,50 @@ msgstr ""
 msgid "A conflict resolution process was started with you"
 msgstr ""
 
+#: karrot/offers/api.py:98
+msgid "You are not the owner of this offer"
+msgstr ""
+
+#: karrot/offers/api.py:160
+msgid "You can only accept an active offer"
+msgstr ""
+
+#: karrot/offers/api.py:175
+msgid "You can only archive an active offer"
+msgstr ""
+
+#: karrot/offers/serializers.py:100
+msgid "Must have at least one image"
+msgstr ""
+
+#: karrot/offers/templates/new_offer.html.jinja2:6
+#: karrot/offers/templates/new_offer.subject.jinja2:1
+#, python-format
+msgid "%(user_name)s created a new offer %(offer_name)s"
+msgstr ""
+
+#: karrot/offers/templates/new_offer.html.jinja2:223
+#, python-format
+msgid "%(user_name)s created a new offer"
+msgstr ""
+
+#: karrot/offers/templates/new_offer.html.jinja2:239
+msgid "View offer"
+msgstr ""
+
+#: karrot/offers/templates/new_offer.html.jinja2:274
+msgid ""
+"You are receiving this because you are subscribed to <strong>New "
+"Offer</strong> emails for this group."
+msgstr ""
+
+#: karrot/offers/templates/new_offer.html.jinja2:278
+#, python-format
+msgid ""
+"Reply to this email directly, <a href=\"%(offer_url)s\">view it on "
+"%(site_name)s</a>, or <a href=\"%(mute_url)s\">mute the conversation</a>."
+msgstr ""
+
 #: karrot/pickups/permissions.py:7
 msgid "The pickup date is in the past."
 msgstr "開放領取食物的日期已過。"
@@ -598,49 +648,49 @@ msgstr "開放食物領取日期已滿。"
 msgid "This feedback is given by another user."
 msgstr "此反映來自其他用戶"
 
-#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:398
+#: karrot/pickups/permissions.py:57 karrot/pickups/serializers.py:399
 #, python-format
 msgid ""
 "You can't give feedback for pickups more than %(days_number)s days ago."
 msgstr "你不能在早於%(days_number)s天前反映領取食物的事"
 
-#: karrot/pickups/serializers.py:32
+#: karrot/pickups/serializers.py:33
 msgid "Must be a list"
 msgstr ""
 
-#: karrot/pickups/serializers.py:33
+#: karrot/pickups/serializers.py:34
 msgid "Must be a list with one or two values"
 msgstr ""
 
-#: karrot/pickups/serializers.py:34
+#: karrot/pickups/serializers.py:35
 msgid "Must pass start value"
 msgstr ""
 
-#: karrot/pickups/serializers.py:116
+#: karrot/pickups/serializers.py:117
 msgid "The date should be in the future."
 msgstr "日期應該設定在未來。"
 
-#: karrot/pickups/serializers.py:174
+#: karrot/pickups/serializers.py:175
 msgid "You can't move pickups that are part of a series."
 msgstr ""
 
-#: karrot/pickups/serializers.py:309
+#: karrot/pickups/serializers.py:310
 msgid "Invalid recurrence rule."
 msgstr "無效的週期規則"
 
-#: karrot/pickups/serializers.py:311
+#: karrot/pickups/serializers.py:312
 msgid "Only single recurrence rules are allowed."
 msgstr "只允許一種週期規則"
 
-#: karrot/pickups/serializers.py:393
+#: karrot/pickups/serializers.py:394
 msgid "The pickup is not done yet"
 msgstr "食物領取任務未完成"
 
-#: karrot/pickups/serializers.py:395
+#: karrot/pickups/serializers.py:396
 msgid "You aren't assigned to the pickup."
 msgstr "你並未被分配到此領取任務"
 
-#: karrot/pickups/serializers.py:412
+#: karrot/pickups/serializers.py:413
 msgid "Both comment and weight cannot be blank."
 msgstr "意見回饋和重量兩欄都不能是空的"
 

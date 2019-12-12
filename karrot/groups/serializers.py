@@ -1,7 +1,7 @@
 import pytz
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from versatileimagefield.serializers import VersatileImageFieldSerializer
@@ -96,6 +96,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'active_agreement',
             'status',
             'theme',
+            'features',
             'notification_types',
             'is_open',
             'trust_threshold_for_newcomer',
@@ -126,6 +127,7 @@ class GroupDetailSerializer(GroupBaseSerializer):
             'notification_types',
             'is_open',
             'theme',
+            'features',
         ]
 
     def validate_active_agreement(self, active_agreement):
@@ -325,6 +327,7 @@ class GroupMembershipAddNotificationTypeSerializer(serializers.Serializer):
             GroupNotificationType.WEEKLY_SUMMARY,
             GroupNotificationType.DAILY_PICKUP_NOTIFICATION,
             GroupNotificationType.NEW_APPLICATION,
+            GroupNotificationType.NEW_OFFER,
             GroupNotificationType.CONFLICT_RESOLUTION,
         )],
         required=True,

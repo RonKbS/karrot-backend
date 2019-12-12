@@ -1,6 +1,7 @@
 import pytz
+from django.http import HttpResponseRedirect, Http404
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework import status
@@ -73,6 +74,16 @@ class GroupInfoViewSet(
     search_fields = ('name', 'public_description')
     serializer_class = GroupPreviewSerializer
 
+    @action(
+        detail=True,
+        methods=['GET']
+    )
+    def photo(self, request, pk=None):
+        group = self.get_object()
+        if not group.photo:
+            raise Http404()
+        return HttpResponseRedirect(redirect_to=group.photo.url)
+
 
 class GroupViewSet(
         mixins.CreateModelMixin,
@@ -116,15 +127,15 @@ class GroupViewSet(
     def get_queryset(self):
         qs = self.queryset
 
-        if self.action != 'join':
-            qs = qs.filter(members=self.request.user)
-
         if self.action in ('retrieve', 'list'):
             qs = qs.annotate_active_editors_count().annotate_yesterdays_member_count().prefetch_related(
                 'members',
                 'groupmembership_set',
                 'groupmembership_set__trusted_by',
             )
+
+        if self.action != 'join':
+            qs = qs.filter(members=self.request.user)
 
         return qs
 

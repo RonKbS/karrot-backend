@@ -1,11 +1,11 @@
 import json
 import os
+from unittest.mock import patch, call
 
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-from unittest.mock import patch, call
 
 from karrot.groups import roles
 from karrot.groups.factories import GroupFactory
@@ -54,12 +54,26 @@ class TestGroupsInfoAPI(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_group_image_redirect(self):
+        # NOT logged in (as it needs to work in emails)
+        photo_file = os.path.join(os.path.dirname(__file__), './photo.jpg')
+        group = GroupFactory(photo=photo_file, members=[self.member])
+        response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, group.photo.url)
+
+    def test_group_image_redirect_no_photo(self):
+        # NOT logged in (as it needs to work in emails)
+        group = GroupFactory(members=[self.member])
+        response = self.client.get('/api/groups-info/{}/photo/'.format(group.id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class TestGroupsAPI(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.member = UserFactory()
-        self.group = GroupFactory(members=[self.member], is_open=True)
+        self.group = GroupFactory(members=[self.member, UserFactory()], is_open=True)
         self.url = '/api/groups/'
         self.group_data = {
             'name': faker.name(),
@@ -117,6 +131,7 @@ class TestGroupsAPI(APITestCase):
             response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('photo_urls', response.data)
+        self.assertEqual(response.data['active_editors_count'], 2)
 
     def test_patch_group(self):
         url = self.url + str(self.group.id) + '/'

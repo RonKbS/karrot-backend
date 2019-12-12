@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import DateTimeField, Field
@@ -16,6 +16,7 @@ from karrot.pickups import stats
 from karrot.pickups.models import (
     PickupDate as PickupDateModel, Feedback as FeedbackModel, PickupDateSeries as PickupDateSeriesModel
 )
+from karrot.utils.date_utils import csv_datetime
 from karrot.utils.misc import find_changed
 
 
@@ -436,7 +437,7 @@ class FeedbackExportSerializer(FeedbackSerializer):
         pickup = feedback.about
         group = pickup.place.group
 
-        return pickup.date.start.astimezone(group.timezone).isoformat(timespec='seconds')
+        return csv_datetime(pickup.date.start.astimezone(group.timezone))
 
     def get_about_place(self, feedback):
         return feedback.about.place_id
@@ -445,7 +446,7 @@ class FeedbackExportSerializer(FeedbackSerializer):
         pickup = feedback.about
         group = pickup.place.group
 
-        return feedback.created_at.astimezone(group.timezone).isoformat(timespec='seconds')
+        return csv_datetime(feedback.created_at.astimezone(group.timezone))
 
 
 class FeedbackExportRenderer(CSVRenderer):

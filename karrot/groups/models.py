@@ -101,10 +101,15 @@ class Group(BaseModel, LocationModel, ConversationMixin, DirtyFieldsMixin):
         upload_to='group_photos',
         null=True,
     )
+    features = ArrayField(TextField(), default=list)
 
     @property
     def group(self):
         return self
+
+    @property
+    def conversation_supports_threads(self):
+        return True
 
     def __str__(self):
         return 'Group {}'.format(self.name)
@@ -211,6 +216,7 @@ class GroupNotificationType(object):
     DAILY_PICKUP_NOTIFICATION = 'daily_pickup_notification'
     NEW_APPLICATION = 'new_application'
     CONFLICT_RESOLUTION = 'conflict_resolution'
+    NEW_OFFER = 'new_offer'
 
 
 def get_default_notification_types():

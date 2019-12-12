@@ -1,16 +1,16 @@
 import itertools
-
 import os
 import pathlib
+from operator import itemgetter
+from shutil import copyfile
+from unittest.mock import patch
+
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.crypto import get_random_string
-from operator import itemgetter
-from shutil import copyfile
-from unittest.mock import patch
 
 from karrot.applications.factories import ApplicationFactory
 from karrot.conversations.factories import ConversationFactory
@@ -21,6 +21,7 @@ from karrot.groups.factories import GroupFactory
 from karrot.invitations.models import Invitation
 from karrot.issues.factories import IssueFactory, vote_for_further_discussion
 from karrot.notifications.models import Notification
+from karrot.offers.factories import OfferFactory
 from karrot.pickups.factories import FeedbackFactory, PickupDateFactory, \
     PickupDateSeriesFactory
 from karrot.pickups.models import PickupDate, to_range
@@ -98,6 +99,9 @@ class WSClient:
             return [channel, topic, payload]
 
         return [normalize_call_args(*args, **kwargs) for args, kwargs in self.send_in_channel_mock.call_args_list]
+
+    def reset_messages(self):
+        self.send_in_channel_mock.reset_mock()
 
     @property
     def messages(self):
@@ -642,6 +646,56 @@ class PickupDateSeriesReceiverTests(WSTestCase):
         response = self.client.messages_by_topic.get('pickups:series_deleted')[0]
         self.assertEqual(response['payload']['id'], id)
 
+        self.assertEqual(len(self.client.messages), 1)
+
+
+class OfferReceiverTests(WSTestCase):
+    def setUp(self):
+        super().setUp()
+        self.member = UserFactory()
+        self.other_member = UserFactory()
+        self.group = GroupFactory(members=[self.member, self.other_member])
+        self.offer = OfferFactory(group=self.group, user=self.member)
+
+    def test_receive_offer_changes(self):
+        self.client = self.connect_as(self.member)
+
+        self.offer.name = faker.name()
+        self.offer.save()
+        response = self.client.messages_by_topic.get('offers:offer')[0]
+        self.assertEqual(response['payload']['name'], self.offer.name)
+        self.assertEqual(len(self.client.messages), 1)
+
+    def test_receiver_offer_deleted(self):
+        self.client = self.connect_as(self.member)
+
+        id = self.offer.id
+        self.offer.delete()
+
+        response = self.client.messages_by_topic.get('offers:offer_deleted')[0]
+        self.assertEqual(response['payload']['id'], id)
+        self.assertEqual(len(self.client.messages), 1)
+
+    def test_receiver_offer_deleted_for_other_user_when_archived(self):
+        self.client = self.connect_as(self.other_member)
+
+        id = self.offer.id
+        self.offer.archive()
+
+        response = self.client.messages_by_topic.get('offers:offer_deleted')[0]
+        self.assertEqual(response['payload']['id'], id)
+        self.assertEqual(len(self.client.messages), 1)
+
+    def test_receiver_offer_updated_for_other_user_when_archived_if_in_conversation(self):
+        self.client = self.connect_as(self.other_member)
+        self.offer.conversation.join(self.other_member)
+        self.client.reset_messages()  # otherwise we have various conversation related messages
+
+        id = self.offer.id
+        self.offer.archive()
+
+        response = self.client.messages_by_topic.get('offers:offer')[0]
+        self.assertEqual(response['payload']['id'], id)
         self.assertEqual(len(self.client.messages), 1)
 
 

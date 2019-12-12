@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import prefetch_related_objects, F
 from django.http import Http404
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework import status
@@ -29,6 +29,8 @@ from karrot.conversations.serializers import (
 )
 from karrot.issues.models import Issue
 from karrot.issues.serializers import IssueSerializer
+from karrot.offers.models import Offer
+from karrot.offers.serializers import OfferSerializer
 from karrot.pickups.models import PickupDate
 from karrot.pickups.serializers import PickupDateSerializer
 from karrot.users.serializers import UserInfoSerializer
@@ -114,7 +116,10 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
     filter_backends = (filters.DjangoFilterBackend, )
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        qs = self.queryset.filter(user=self.request.user)
+        if self.action == 'retrieve':
+            qs = qs.select_related('conversation', 'conversation__target_type').annotate_unread_message_count()
+        return qs
 
     def get_object(self):
         try:
@@ -170,6 +175,12 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             filter(id__in=[c.target_id for c in issue_conversations]). \
             prefetch_for_serializer(user=request.user)
 
+        offers_ct = ContentType.objects.get_for_model(Offer)
+        offer_conversations = [item for item in conversations if item.target_type == offers_ct]
+        offers = Offer.objects. \
+            filter(id__in=[c.target_id for c in offer_conversations]). \
+            prefetch_related('images')
+
         # Applicant does not have access to group member profiles, so we attach reduced user profiles
         my_applications = [a for a in applications if a.user == request.user]
 
@@ -186,6 +197,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
         pickups_serializer = PickupDateSerializer(pickups, many=True, context=context)
         application_serializer = ApplicationSerializer(applications, many=True, context=context)
         issue_serializer = IssueSerializer(issues, many=True, context=context)
+        offer_serializer = OfferSerializer(offers, many=True, context=context)
         user_serializer = UserInfoSerializer(users, many=True, context=context)
         meta, _ = ConversationMeta.objects.get_or_create(user=request.user)
         meta_serializer = ConversationMetaSerializer(meta, context=self.get_serializer_context())
@@ -196,6 +208,7 @@ class ConversationViewSet(mixins.RetrieveModelMixin, PartialUpdateModelMixin, Ge
             'pickups': pickups_serializer.data,
             'applications': application_serializer.data,
             'issues': issue_serializer.data,
+            'offers': offer_serializer.data,
             'users_info': user_serializer.data,
             'meta': meta_serializer.data,
         })
@@ -387,7 +400,6 @@ class ConversationMessageViewSet(
 
 class RetrieveConversationMixin(object):
     """Retrieve a conversation instance."""
-
     def retrieve_conversation(self, request, *args, **kwargs):
         target = self.get_object()
         conversation = Conversation.objects. \
@@ -408,7 +420,6 @@ class RetrieveConversationMixin(object):
 
 class RetrievePrivateConversationMixin(object):
     """Retrieve a private user conversation instance."""
-
     def retrieve_private_conversation(self, request, *args, **kwargs):
         user2 = self.get_object()
         try:
